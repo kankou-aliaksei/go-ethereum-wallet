@@ -2,28 +2,27 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/keygen"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/asset"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/ethereum_client"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/logger"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/transaction"
-)
 
-const (
-	publicNodeUrl       = "https://rpc.sepolia.org"                    // Mainnet: "https://cloudflare-eth.com", Sepolia: "https://rpc.sepolia.org"
-	ethereumExplorerUrl = "https://sepolia.etherscan.io"               // Mainnet: "https://etherscan.io", Sepolia: "https://sepolia.etherscan.io"
-	usdtContractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7" // Mainnet: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
+	"go-ethereum-wallet/keygen"
+	"go-ethereum-wallet/transfer/asset"
+	"go-ethereum-wallet/transfer/config"
+	"go-ethereum-wallet/transfer/ethereum_client"
+	"go-ethereum-wallet/transfer/logger"
+	"go-ethereum-wallet/transfer/transaction"
+	"go-ethereum-wallet/transfer/userinput"
 )
 
 func main() {
 	var accountName, receiverAddress, assetChoice string
 	var amountInDollars float64
 
-	usdtAsset, err := asset.NewUsdt(usdtContractAddress)
+	// Choose the desired configuration
+	cfg := config.SepoliaTestnet
+
+	usdtAsset, err := asset.NewUsdt(cfg.UsdtContractAddress)
 	if err != nil {
 		logger.Error.Fatalf("Failed to create Usdt asset: %v", err)
 	}
@@ -33,43 +32,31 @@ func main() {
 		"2": usdtAsset,
 	}
 
-	fmt.Println("Select the asset to transfer:")
-	for key, value := range assets {
-		fmt.Printf("%s: %s\n", key, value.Name())
-	}
-	fmt.Println("Enter the number of your choice: ")
-	fmt.Scanln(&assetChoice)
-
+	assetChoice = userinput.SelectAsset(assets)
 	currentAsset, exists := assets[assetChoice]
 	if !exists {
 		logger.Error.Fatalf("Invalid asset choice")
 	}
 
-	fmt.Print("Enter your account name: ")
-	fmt.Scanln(&accountName)
-
+	accountName = userinput.GetAccountName()
 	privateKeyHex, err := keygen.RetrievePrivateKeyHex(accountName)
 	if err != nil {
 		logger.Error.Fatalf("Failed to retrieve private key: %v", err)
 	}
 
-	fmt.Print("Enter the receiver's address: ")
-	fmt.Scanln(&receiverAddress)
-
+	receiverAddress = userinput.GetReceiverAddress()
 	ethPrice, err := ethereum_client.GetETHUSDPrice()
 	if err != nil {
 		logger.Error.Fatalf("Failed to get ETH price: %v", err)
 	}
 	logger.Info.Printf("Current ETH/USD price: $%.2f\n", ethPrice)
 
-	fmt.Print("Enter the amount to transfer (in USD): ")
-	fmt.Scanf("%f", &amountInDollars)
-
+	amountInDollars = userinput.GetTransferAmount()
 	if amountInDollars <= 0 {
 		logger.Error.Fatalf("Invalid amount")
 	}
 
-	client, err := ethclient.Dial(publicNodeUrl)
+	client, err := ethclient.Dial(cfg.PublicNodeUrl)
 	if err != nil {
 		logger.Error.Fatalf("Failed to connect to the Ethereum client: %v", err)
 	}
@@ -94,7 +81,6 @@ func main() {
 
 	gasLimit := uint64(21000)
 	transactionFeeUSD := ethereum_client.CalculateTransactionFee(increasedGasPrice, gasLimit, ethPrice)
-
 	logger.Info.Printf("Transaction Fee: $%.6f\n", transactionFeeUSD)
 
 	balance, err := client.BalanceAt(context.Background(), fromAddress, nil)
@@ -108,11 +94,7 @@ func main() {
 		logger.Error.Fatalf("Insufficient balance to cover transaction fee: required %s wei, but only %s wei available", requiredGasFee.String(), balance.String())
 	}
 
-	var confirmation string
-	fmt.Print("Are you okay with this increased gas price and transaction fee? (yes/no): ")
-	fmt.Scanln(&confirmation)
-
-	if confirmation != "yes" {
+	if !userinput.ConfirmTransaction() {
 		logger.Info.Println("Transaction cancelled.")
 		return
 	}
@@ -132,7 +114,7 @@ func main() {
 		logger.Error.Fatalf("Failed to create transaction: %v", err)
 	}
 
-	if err := transaction.SendTransaction(client, tx, privateKey, ethereumExplorerUrl); err != nil {
+	if err := transaction.SendTransaction(client, tx, privateKey, cfg.EthereumExplorerUrl); err != nil {
 		logger.Error.Fatalf("Transaction sending failed: %v", err)
 	}
 }

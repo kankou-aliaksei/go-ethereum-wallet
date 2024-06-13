@@ -1,3 +1,5 @@
+// transaction/transaction.go
+
 package transaction
 
 import (
@@ -7,7 +9,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/logger"
+	"go-ethereum-wallet/transfer/logger"
 )
 
 func SendTransaction(client *ethclient.Client, tx *types.Transaction, privateKey *ecdsa.PrivateKey, baseURL string) error {

@@ -1,3 +1,5 @@
+// keygen/keygen.go
+
 package keygen
 
 import (
@@ -15,7 +17,7 @@ import (
 	"path/filepath"
 )
 
-const AccountPath = "../account"
+const AccountPath = "./account"
 
 func CreateAccount() {
 	fmt.Print("Enter account name: ")

@@ -1,3 +1,5 @@
+// transfer/asset/usdt.go
+
 package asset
 
 import (

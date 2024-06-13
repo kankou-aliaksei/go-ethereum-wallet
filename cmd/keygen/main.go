@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/keygen"
+	"go-ethereum-wallet/keygen"
 )
 
 func main() {

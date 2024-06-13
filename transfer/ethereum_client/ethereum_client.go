@@ -1,3 +1,5 @@
+// ethereum_client/ethereum_client.go
+
 package ethereum_client
 
 import (
@@ -11,7 +13,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/logger"
+	"go-ethereum-wallet/transfer/logger"
 )
 
 const (

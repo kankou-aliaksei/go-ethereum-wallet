@@ -1,3 +1,5 @@
+// transfer/asset/asset.go
+
 package asset
 
 import (
