@@ -6,7 +6,6 @@ import (
 	"math/big"
 )
 
-// Asset is the interface for different types of assets
 type Asset interface {
 	Name() string
 	CreateTransferTransaction(client *ethclient.Client, input *TransferInput) (*types.Transaction, error)

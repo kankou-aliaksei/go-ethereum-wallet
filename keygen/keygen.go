@@ -1,5 +1,3 @@
-// keygen/keygen.go
-
 package keygen
 
 import (

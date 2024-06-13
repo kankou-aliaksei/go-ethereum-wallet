@@ -2,10 +2,7 @@ package main
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"encoding/hex"
 	"fmt"
-	"github.com/ethereum/go-ethereum/core/types"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -13,11 +10,12 @@ import (
 	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/asset"
 	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/ethereum_client"
 	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/logger"
+	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/transaction"
 )
 
 const (
-	publicNodeUrl       = "https://rpc.sepolia.org"                    // Mainnet: "https://cloudflare-eth.com"
-	ethereumExplorerUrl = "https://sepolia.etherscan.io"               // Mainnet: https://etherscan.io/
+	publicNodeUrl       = "https://rpc.sepolia.org"                    // Mainnet: "https://cloudflare-eth.com", Sepolia: "https://rpc.sepolia.org"
+	ethereumExplorerUrl = "https://sepolia.etherscan.io"               // Mainnet: "https://etherscan.io", Sepolia: "https://sepolia.etherscan.io"
 	usdtContractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7" // Mainnet: "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 )
 
@@ -25,9 +23,14 @@ func main() {
 	var accountName, receiverAddress, assetChoice string
 	var amountInDollars float64
 
+	usdtAsset, err := asset.NewUsdt(usdtContractAddress)
+	if err != nil {
+		logger.Error.Fatalf("Failed to create Usdt asset: %v", err)
+	}
+
 	var assets = map[string]asset.Asset{
 		"1": &asset.Ether{},
-		"2": asset.NewUsdt(usdtContractAddress),
+		"2": usdtAsset,
 	}
 
 	fmt.Println("Select the asset to transfer:")
@@ -129,39 +132,7 @@ func main() {
 		logger.Error.Fatalf("Failed to create transaction: %v", err)
 	}
 
-	privateKeyBytes := privateKey.D.Bytes()
-
-	// Convert the private key to hex
-	privateKeyHex1 := hex.EncodeToString(privateKeyBytes)
-
-	fmt.Printf("Private Key (Hex): %s\n", privateKeyHex1)
-
-	fmt.Println(tx)
-
-	if err := SendTransaction1(client, tx, privateKey, ethereumExplorerUrl); err != nil {
+	if err := transaction.SendTransaction(client, tx, privateKey, ethereumExplorerUrl); err != nil {
 		logger.Error.Fatalf("Transaction sending failed: %v", err)
 	}
-}
-
-func SendTransaction1(client *ethclient.Client, tx *types.Transaction, privateKey *ecdsa.PrivateKey, baseURL string) error {
-
-	chainID, err := client.NetworkID(context.Background())
-	if err != nil {
-		return fmt.Errorf("failed to get network ID: %w", err)
-	}
-
-	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
-	if err != nil {
-		return fmt.Errorf("failed to sign transaction: %w", err)
-	}
-
-	if err := client.SendTransaction(context.Background(), signedTx); err != nil {
-		return fmt.Errorf("failed to send transaction: %w", err)
-	}
-
-	txHash := signedTx.Hash().Hex()
-	logger.Info.Printf("Transaction sent: %s\n", txHash)
-	logger.Info.Printf("Check the transaction at: %s/tx/%s\n", baseURL, txHash)
-
-	return nil
 }
