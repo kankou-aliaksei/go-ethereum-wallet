@@ -1,4 +1,6 @@
-package main
+// keygen/keygen.go
+
+package keygen
 
 import (
 	"crypto/aes"

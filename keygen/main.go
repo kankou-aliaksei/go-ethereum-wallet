@@ -1,7 +1,10 @@
+// keygen/main.go
+
 package main
 
 import (
 	"fmt"
+	"github.com/kankou-aliaksei/go-ethereum-wallet/keygen"
 )
 
 func main() {
@@ -19,13 +22,13 @@ func main() {
 
 		switch choice {
 		case 1:
-			CreateAccount()
+			keygen.CreateAccount()
 		case 2:
-			GetAddressForAccount()
+			keygen.GetAddressForAccount()
 		case 3:
-			GetPrivateKeyForAccount()
+			keygen.GetPrivateKeyForAccount()
 		case 4:
-			SaveAccountWithPrivateKey()
+			keygen.SaveAccountWithPrivateKey()
 		case 5:
 			return
 		default:
