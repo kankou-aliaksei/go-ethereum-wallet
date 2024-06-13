@@ -7,11 +7,11 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-	"github.com/ethereum/go-ethereum/rpc"
 )
 
 type Usdt struct {
@@ -54,7 +54,7 @@ func (u *Usdt) CreateTransferTransaction(client *ethclient.Client, input *Transf
 		return nil, fmt.Errorf("failed to pack transfer data: %v", err)
 	}
 
-	msg := rpc.CallMsg{
+	msg := ethereum.CallMsg{
 		From: fromAddress,
 		To:   &tokenAddress,
 		Data: data,
