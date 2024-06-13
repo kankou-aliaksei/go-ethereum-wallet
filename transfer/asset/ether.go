@@ -9,7 +9,6 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-// Ether represents the Ether asset
 type Ether struct{}
 
 func (e *Ether) Name() string {
