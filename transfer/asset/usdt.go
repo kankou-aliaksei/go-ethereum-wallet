@@ -7,15 +7,11 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
-
-// Contract address for USDT token
-const UsdtContractAddress = "0xdAC17F958D2ee523a2206206994597C13D831ec7"
 
 // Usdt represents the USDT asset
 type Usdt struct {
@@ -23,13 +19,17 @@ type Usdt struct {
 	contractABI   abi.ABI
 }
 
-func NewUsdt() *Usdt {
-	contractAddress := common.HexToAddress(UsdtContractAddress)
-	contractABI, _ := abi.JSON(strings.NewReader(`[{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]`))
-	return &Usdt{
-		tokenContract: contractAddress,
-		contractABI:   contractABI,
+// NewUsdt creates a new Usdt instance with a configurable contract address
+func NewUsdt(contractAddress string) (*Usdt, error) {
+	address := common.HexToAddress(contractAddress)
+	contractABI, err := abi.JSON(strings.NewReader(`[{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}]`))
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ABI: %v", err)
 	}
+	return &Usdt{
+		tokenContract: address,
+		contractABI:   contractABI,
+	}, nil
 }
 
 func (u *Usdt) Name() string {
