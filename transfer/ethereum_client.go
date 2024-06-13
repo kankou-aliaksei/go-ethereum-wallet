@@ -1,6 +1,6 @@
 // ethereum_client.go
 
-package ethereum_client
+package transfer
 
 import (
 	"context"

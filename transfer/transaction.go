@@ -1,6 +1,6 @@
 // src/transaction
 
-package transaction
+package transfer
 
 import (
 	"context"
