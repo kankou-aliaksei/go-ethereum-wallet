@@ -1,19 +1,16 @@
-// src/transaction
-
-package transfer
+package transaction
 
 import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
-	"transfer/logger"
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/kankou-aliaksei/go-ethereum-wallet/transfer/logger"
 )
 
-func sendTransaction(client *ethclient.Client, tx *types.Transaction, privateKey *ecdsa.PrivateKey) error {
-	// Sign and send transaction
+func SendTransaction(client *ethclient.Client, tx *types.Transaction, privateKey *ecdsa.PrivateKey) error {
 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(tx.ChainId()), privateKey)
 	if err != nil {
 		return fmt.Errorf("failed to sign transaction: %v", err)
